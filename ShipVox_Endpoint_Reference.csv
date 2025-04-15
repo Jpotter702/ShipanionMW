@@ -1,0 +1,5 @@
+Route,Method,Description,Request Payload,Response,Notes
+/,GET,Returns the main app interface (UI rendering),None,HTML page (React frontend),Primarily used for browser access
+/get-rates,POST,Receives shipping details and returns cheapest and fastest rate options,"{ originZip, destinationZip, weight, dimensions }","{ cheapestOption, cheapestFastestOption }","Triggers normalization, rate requests, and comparison"
+/create-label,POST,Generates a shipping label based on selected carrier and service,"{ selectedCarrier, serviceType, shipperInfo, recipientInfo, packageDetails }","{ labelPDF, trackingNumber, QRCodeURL }",LabelGenerator module handles carrier-specific formatting
+/schedule-pickup,POST,Schedules a pickup with the selected carrier,"{ pickupLocation, contactInfo, timeWindow }","{ confirmationNumber, pickupTime }",Only used if pickup is requested
