@@ -1,7 +1,6 @@
 from typing import Dict, Optional
 from enum import Enum
-import pandas as pd
-from ..utils.exceptions import ValidationError
+from utils.exceptions import ValidationError  # Changed from relative to absolute import
 
 class ServiceTier(Enum):
     """Standardized shipping service tiers"""

@@ -22,3 +22,7 @@ class CarrierAPIError(ShipVoxBaseException):
 class ConfigurationError(ShipVoxBaseException):
     """Configuration related errors"""
     pass
+
+class RateError(ShipVoxBaseException):
+    """Rate calculation related errors"""
+    pass
