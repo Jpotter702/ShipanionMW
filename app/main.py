@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import rates
+from fastapi.staticfiles import StaticFiles
+from app.routes import rates, labels
 
 app = FastAPI(
     title="ShipVox API",
@@ -19,6 +20,10 @@ app.add_middleware(
 
 # Include routers
 app.include_router(rates.router, prefix="/api", tags=["rates"])
+app.include_router(labels.router, prefix="/api", tags=["labels"])
+
+# Mount static files directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def root():
