@@ -11,3 +11,4 @@ python-jose[cryptography]  # For JWT token handling
 passlib[bcrypt]  # For password hashing
 python-multipart  # For form data handling
 qrcode
+pillow
