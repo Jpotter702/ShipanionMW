@@ -1,0 +1,29 @@
+
+
+The ElevenLabs Conversational AI WebSocket API enables real-time, interactive voice conversations with AI agents. By establishing a WebSocket connection, you can send audio input and receive audio responses in real-time, creating life-like conversational experiences.
+
+ElevenLabs' Conversational AI WebSocket API utilizes structured JSON messages to facilitate real-time interactions between clients and AI agents. This protocol supports various message types, enabling dynamic and context-aware conversations.​
+
+ElevenLabs WebSocket Message Types
+The API defines several message types, each serving a specific purpose in the conversational flow:​
+
+conversation_initiation_client_data: Initiates a conversation with configuration details, such as agent prompts and voice settings.​
+
+user_transcript: Conveys the transcribed text of the user's speech input.​
+
+agent_response: Delivers the AI agent's textual response to the user.​
+
+audio: Provides the AI agent's response in base64-encoded audio format.​
+ElevenLabs
+
+contextual_update: Sends non-intrusive contextual information to update the conversation state without disrupting the flow.​
+client_tool_call: Requests the client to execute a specific tool or function, supplying necessary parameters.​
+
+client_tool_result: Returns the result of a previously requested tool execution.​
+
+ping/pong: Maintain the WebSocket connection's health through heartbeat messages.​
+
+Each message type is structured to ensure seamless integration and real-time responsiveness in conversational applications. 
+ 
+
+and three types of tools that can be utilized, server, clientwe were considering how to update the front end in real-time, and to do that websockets vs making traditional webservices/webhooks, the choice there seems easy and that's to go websockets. OK so we know we want websockets. Then we needed to decide what websocket format you asked me, and I responded with the news that Elevenlabs has an existing websockets method to connect to the voice agent, so we should adopt that same protocol. THEN we see they also have the proxy service, which obviates much of the retooling effort needed as some of those websockets can be "wrapped" in HTTP calls, I think, and that this proxy and sort of serve as a temporary websockets connection. event ifsee that Elevenlabs  To do that we needed our own websocket client/server setup between the shipvox middleware/pipedream/elevenlabs/the UI. or build our own websockets connection betwee
