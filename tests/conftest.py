@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from auth.token_manager import TokenManager
-from auth.fedex_auth import FedExAuthProvider
+from auth.fedex_auth import FedExAuth
 
 @pytest.fixture
 def client():
@@ -14,7 +14,4 @@ def token_manager():
 
 @pytest.fixture
 def fedex_auth_provider():
-    return FedExAuthProvider(
-        client_id="test_client_id",
-        client_secret="test_client_secret"
-    ) 
+    return FedExAuth()

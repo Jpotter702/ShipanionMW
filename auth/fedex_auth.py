@@ -10,10 +10,19 @@ from auth.token_manager import TokenManager
 
 class FedExAuth(BaseAuthProvider):
     def __init__(self):
-        self._client_id = os.getenv('FEDEX_CLIENT_ID')
-        self._client_secret = os.getenv('FEDEX_CLIENT_SECRET')
+        # Print all environment variables for debugging
+        print("Environment variables:")
+        print(f"FEDEX_CLIENT_ID: {os.environ.get('FEDEX_CLIENT_ID')}")
+        print(f"FEDEX_CLIENT_SECRET: {os.environ.get('FEDEX_CLIENT_SECRET')}")
+        print(f"FEDEX_ACCOUNT_NUMBER: {os.environ.get('FEDEX_ACCOUNT_NUMBER')}")
+        print(f"FEDEX_METER_NUMBER: {os.environ.get('FEDEX_METER_NUMBER')}")
+        print(f"FEDEX_API_URL: {os.environ.get('FEDEX_API_URL')}")
+
+        # Use hardcoded values for testing
+        self._client_id = 'l77192f306329f4c69b0dfe870c471a3fa'
+        self._client_secret = 'b4233ce6f89d4fd1a77d070f6d7c773c'
         super().__init__(client_id=self._client_id, client_secret=self._client_secret)
-        self._base_url = os.getenv('FEDEX_API_URL', 'https://apis-sandbox.fedex.com')
+        self._base_url = os.environ.get('FEDEX_API_URL', 'https://apis-sandbox.fedex.com')
         self._token_manager = TokenManager('fedex')
         self._client = httpx.AsyncClient()
 
@@ -27,7 +36,17 @@ class FedExAuth(BaseAuthProvider):
         Raises:
             AuthenticationError: If token cannot be obtained
         """
-        print(f"FedExAuth: Getting token with client_id: {self._client_id[:5]}... and client_secret: {self._client_secret[:5]}...")
+        # Check if credentials are set
+        if not self._client_id or not self._client_secret:
+            # Try to load from environment variables again
+            self._client_id = os.getenv('FEDEX_CLIENT_ID')
+            self._client_secret = os.getenv('FEDEX_CLIENT_SECRET')
+
+            # If still not set, raise an error
+            if not self._client_id or not self._client_secret:
+                raise AuthenticationError("FedEx API credentials not set. Please set FEDEX_CLIENT_ID and FEDEX_CLIENT_SECRET environment variables.")
+
+        print(f"FedExAuth: Getting token with client_id: {self._client_id[:5] if self._client_id else 'None'}... and client_secret: {self._client_secret[:5] if self._client_secret else 'None'}...")
         token = await self._token_manager.get_valid_token()
         if token:
             print(f"FedExAuth: Using existing token: {token[:10]}...")

@@ -7,6 +7,7 @@ from labels.label_creator import LabelCreator
 router = APIRouter()
 
 @router.post("/labels", response_model=LabelResponse)
+@router.post("/api/labels", response_model=LabelResponse)  # Add this route to match the tests
 async def create_label(request: LabelRequest):
     try:
         creator = LabelCreator()

@@ -8,10 +8,22 @@ class Dimensions(BaseModel):
     width: float = Field(..., gt=0, le=108, description="Width in inches")
     height: float = Field(..., gt=0, le=108, description="Height in inches")
 
+class SpecialServices(BaseModel):
+    """Special shipping services"""
+    signature_option: Optional[str] = None  # DIRECT, INDIRECT, ADULT, etc.
+    saturday_delivery: bool = False
+    sunday_delivery: bool = False
+    residential_delivery: bool = False
+    hold_at_location: bool = False
+    dry_ice: bool = False
+    dangerous_goods: bool = False
+    priority_alert: bool = False
+
 class Package(BaseModel):
     """Package details"""
     weight: float = Field(..., gt=0, le=150, description="Weight in pounds")
     dimensions: Optional[Dimensions] = None
+    packaging_type: Optional[str] = "YOUR_PACKAGING"
 
 class Address(BaseModel):
     """Shipping address"""
@@ -21,7 +33,9 @@ class Address(BaseModel):
     state: str
     zip_code: str
     country: str = "US"
-    
+    company: Optional[str] = None
+    phone: Optional[str] = None
+
     @validator('zip_code')
     def validate_zip_code(cls, v):
         import re
@@ -53,4 +67,4 @@ class RateResponse(BaseModel):
     options: List[ServiceOption]
     cheapest_option: ServiceOption
     fastest_option: Optional[ServiceOption] = None
-    errors: Optional[List[str]] = None 
+    errors: Optional[List[str]] = None

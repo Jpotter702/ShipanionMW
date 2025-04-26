@@ -1,7 +1,7 @@
 
 from pydantic import BaseModel
-from typing import Literal
-from models.shipping import Address, Package
+from typing import Literal, Optional
+from models.shipping import Address, Package, SpecialServices
 
 class LabelRequest(BaseModel):
     carrier: Literal["fedex", "ups"]
@@ -9,3 +9,4 @@ class LabelRequest(BaseModel):
     recipient: Address
     package: Package
     service_type: str  # e.g., FEDEX_GROUND, FEDEX_2_DAY_AM
+    special_services: Optional[SpecialServices] = None
