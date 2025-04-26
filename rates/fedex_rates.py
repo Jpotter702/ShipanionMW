@@ -23,6 +23,7 @@ class FedExRateEngine(BaseRateEngine):
         # Use sandbox URL for development/testing
         self._base_url = os.getenv('FEDEX_API_URL', 'https://apis-sandbox.fedex.com')
         self._account_number = os.getenv('FEDEX_ACCOUNT_NUMBER')
+        print(f"FedExRateEngine: Initialized with account number: {self._account_number}")
         self._client = httpx.AsyncClient()
         self._normalizer = ServiceNormalizer()
 
@@ -46,16 +47,8 @@ class FedExRateEngine(BaseRateEngine):
         """
         Get shipping rates from FedEx.
         """
-        try:
-            # Check if we're in mock mode (no API credentials)
-            # Use environment variables directly to avoid attribute errors
-            if not os.getenv('FEDEX_CLIENT_ID') or not os.getenv('FEDEX_CLIENT_SECRET'):
-                # Return mock data for testing
-                return self._get_mock_rates(request)
-        except Exception as e:
-            # If there's any issue with the check, use mock data
-            print(f"Error checking FedEx credentials: {str(e)}. Using mock data.")
-            return self._get_mock_rates(request)
+        # Always use the real FedEx API, no more mock data
+        print("FedExRateEngine: Using real FedEx API for rates")
 
         try:
             print("FedExRateEngine: Getting token from auth service")
@@ -87,18 +80,23 @@ class FedExRateEngine(BaseRateEngine):
             print(f"FedExRateEngine: Headers: {headers}")
 
             try:
+                print(f"FedExRateEngine: Sending request: {json.dumps(request_data, indent=2)}")
                 response = await self._client.post(
                     rate_url,
                     json=request_data,
-                    headers=headers
+                    headers=headers,
+                    timeout=30.0  # Increase timeout
                 )
                 print(f"FedExRateEngine: Rate response status: {response.status_code}")
                 response.raise_for_status()
+                print(f"FedExRateEngine: Response headers: {response.headers}")
+                print(f"FedExRateEngine: Response text: {response.text}")
             except httpx.HTTPError as e:
                 error_msg = f"FedExRateEngine: HTTP error: {str(e)}"
                 print(error_msg)
                 if hasattr(e, 'response') and e.response is not None:
                     print(f"FedExRateEngine: Error response status: {e.response.status_code}")
+                    print(f"FedExRateEngine: Error response headers: {e.response.headers}")
                     print(f"FedExRateEngine: Error response: {e.response.text}")
 
                 # For 400 errors, let's try with a specific service type as fallback
@@ -190,24 +188,48 @@ class FedExRateEngine(BaseRateEngine):
             RateOption(
                 carrier='fedex',
                 service_name='FedEx Ground',
-                service_tier=ServiceTier.GROUND,
+                service_tier=ServiceTier.GROUND_EOD,
                 cost=base_rate + weight_factor + distance_factor,
                 estimated_delivery=delivery_date,
-                transit_days=3
+                transit_days=5
             ),
             RateOption(
                 carrier='fedex',
                 service_name='FedEx Express Saver',
-                service_tier=ServiceTier.SAVER,
+                service_tier=ServiceTier.DAY3_EOD,
                 cost=(base_rate + weight_factor + distance_factor) * 1.2,
-                estimated_delivery=delivery_date - timedelta(days=1),
+                estimated_delivery=delivery_date - timedelta(days=2),
+                transit_days=3
+            ),
+            RateOption(
+                carrier='fedex',
+                service_name='FedEx 2Day',
+                service_tier=ServiceTier.DAY2_EOD,
+                cost=(base_rate + weight_factor + distance_factor) * 1.8,
+                estimated_delivery=delivery_date - timedelta(days=3),
                 transit_days=2
             ),
             RateOption(
                 carrier='fedex',
-                service_name='FedEx Overnight',
-                service_tier=ServiceTier.OVERNIGHT,
+                service_name='FedEx Standard Overnight',
+                service_tier=ServiceTier.DAY1_EOD,
                 cost=(base_rate + weight_factor + distance_factor) * 2.5,
+                estimated_delivery=overnight_date,
+                transit_days=1
+            ),
+            RateOption(
+                carrier='fedex',
+                service_name='FedEx Priority Overnight',
+                service_tier=ServiceTier.DAY1_NOON,
+                cost=(base_rate + weight_factor + distance_factor) * 3.0,
+                estimated_delivery=overnight_date,
+                transit_days=1
+            ),
+            RateOption(
+                carrier='fedex',
+                service_name='FedEx First Overnight',
+                service_tier=ServiceTier.DAY1_AM,
+                cost=(base_rate + weight_factor + distance_factor) * 3.5,
                 estimated_delivery=overnight_date,
                 transit_days=1
             )
@@ -237,6 +259,11 @@ class FedExRateEngine(BaseRateEngine):
         Returns:
             Dict: Formatted request payload
         """
+        # Make sure account number is not None
+        if not self._account_number:
+            self._account_number = os.getenv('FEDEX_ACCOUNT_NUMBER')
+            print(f"FedExRateEngine: Loaded account number from env: {self._account_number}")
+
         request = {
             "accountNumber": {
                 "value": self._account_number

@@ -11,18 +11,18 @@ from auth.token_manager import TokenManager
 class FedExAuth(BaseAuthProvider):
     def __init__(self):
         # Print all environment variables for debugging
-        print("Environment variables:")
-        print(f"FEDEX_CLIENT_ID: {os.environ.get('FEDEX_CLIENT_ID')}")
-        print(f"FEDEX_CLIENT_SECRET: {os.environ.get('FEDEX_CLIENT_SECRET')}")
-        print(f"FEDEX_ACCOUNT_NUMBER: {os.environ.get('FEDEX_ACCOUNT_NUMBER')}")
-        print(f"FEDEX_METER_NUMBER: {os.environ.get('FEDEX_METER_NUMBER')}")
-        print(f"FEDEX_API_URL: {os.environ.get('FEDEX_API_URL')}")
+        print("FedExAuth: Environment variables:")
+        print(f"FEDEX_CLIENT_ID: {os.getenv('FEDEX_CLIENT_ID')}")
+        print(f"FEDEX_CLIENT_SECRET: {os.getenv('FEDEX_CLIENT_SECRET')}")
+        print(f"FEDEX_ACCOUNT_NUMBER: {os.getenv('FEDEX_ACCOUNT_NUMBER')}")
+        print(f"FEDEX_METER_NUMBER: {os.getenv('FEDEX_METER_NUMBER')}")
+        print(f"FEDEX_API_URL: {os.getenv('FEDEX_API_URL')}")
 
-        # Use hardcoded values for testing
-        self._client_id = 'l77192f306329f4c69b0dfe870c471a3fa'
-        self._client_secret = 'b4233ce6f89d4fd1a77d070f6d7c773c'
+        # Use environment variables
+        self._client_id = os.getenv('FEDEX_CLIENT_ID')
+        self._client_secret = os.getenv('FEDEX_CLIENT_SECRET')
         super().__init__(client_id=self._client_id, client_secret=self._client_secret)
-        self._base_url = os.environ.get('FEDEX_API_URL', 'https://apis-sandbox.fedex.com')
+        self._base_url = os.getenv('FEDEX_API_URL', 'https://apis-sandbox.fedex.com')
         self._token_manager = TokenManager('fedex')
         self._client = httpx.AsyncClient()
 
