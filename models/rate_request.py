@@ -12,7 +12,7 @@ class RateRequest(BaseModel):
     destination_zip: str = Field(..., description="Destination ZIP code")
     weight: float = Field(..., gt=0, description="Weight in pounds")
     dimensions: Optional[Dimensions] = Field(None, description="Package dimensions in inches")
-    pickup_requested: bool = Field(False, description="Whether pickup is requested")
+    pickup_requested: Optional[bool] = Field(None, description="Whether pickup is requested")
 
     @validator('origin_zip', 'destination_zip')
     def validate_zip_code(cls, v):
