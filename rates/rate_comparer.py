@@ -12,6 +12,7 @@ class RateComparer:
     def compare_rates(self, options: List[RateOption]) -> RateResponse:
         """
         Compare shipping rates and return the cheapest and fastest options.
+        Exclude ultra-premium services (e.g., 1dayAM, 2dayAM, First Overnight) from fastest calculation.
         
         Args:
             options: List of rate options from different carriers
@@ -22,16 +23,26 @@ class RateComparer:
         if not options:
             raise ValueError("No rate options provided")
 
-        # Sort options by cost
+        # Cheapest: always the lowest cost
         sorted_by_cost = sorted(options, key=lambda x: x.cost)
         cheapest = sorted_by_cost[0]
 
-        # Find fastest reasonably priced option
-        fastest = None
-        for option in sorted(options, key=lambda x: x.transit_days):
-            if option.cost <= cheapest.cost * self._reasonable_price_multiplier:
-                fastest = option
-                break
+        # Exclude ultra-premium services for fastest
+        def is_ultra_premium(service_name: str) -> bool:
+            name = service_name.lower()
+            return ("am" in name) or ("first" in name)
+
+        non_ultra_premium = [opt for opt in options if not is_ultra_premium(opt.service_name)]
+        if not non_ultra_premium:
+            # fallback: if all are ultra-premium, use all
+            non_ultra_premium = options
+
+        # Find soonest estimated_delivery among non-ultra-premium
+        soonest_date = min(opt.estimated_delivery for opt in non_ultra_premium)
+        soonest_options = [opt for opt in non_ultra_premium if opt.estimated_delivery == soonest_date]
+
+        # If multiple, pick lowest cost among them
+        fastest = min(soonest_options, key=lambda x: x.cost)
 
         return RateResponse(
             cheapest_option=cheapest,
